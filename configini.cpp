@@ -12,10 +12,7 @@ ConfigIni *ConfigIni::GetInstance()
 
 ConfigIni::ConfigIni(QObject *parent) : QObject(parent)
 {
-    m_saveTimeInterval = 10;
-    m_eth = "eth2";
-    m_deleteTimeInterval = 1;
-    m_pcapPath = "/home/pcap";
+    m_channel = "SimpleSniffer";
 }
  
 bool ConfigIni::initConfigFile(QString fileName)
@@ -27,14 +24,29 @@ bool ConfigIni::initConfigFile(QString fileName)
 		QSettings* settings_ = new QSettings(fileName,QSettings::IniFormat);
 		settings_->setIniCodec("UTF-8");
 
-		settings_->beginGroup("MYSQL"); 
-		settings_->endGroup();
+        settings_->beginGroup("PCAPPATH");
+        m_pcapSrcPath = settings_->value("pcapsrcpath").toString();
+        m_pcapDstPath = settings_->value("pcapdstpath").toString();
+        settings_->endGroup();
+
+        settings_->beginGroup("ETH");
+        m_eth = settings_->value("eth").toString();
+        settings_->endGroup();
+
+        settings_->beginGroup("TIMEINTERVAL");
+        m_saveTimeInterval = settings_->value("savetimeinterval").toInt();
+        settings_->endGroup();
 	}
 	else
 	{
-		qWarning()<<fileName + " not exist";
+        WARN(fileName.toLocal8Bit().data()<<" not exist");
 	}
     return result;
+}
+
+QString ConfigIni::getChannel() const
+{
+    return m_channel;
 }
 
 QString ConfigIni::getEth() const
@@ -44,16 +56,11 @@ QString ConfigIni::getEth() const
 
 QString ConfigIni::getPcapPath() const
 {
-    return m_pcapPath;
+    return m_pcapSrcPath;
 }
 
 int ConfigIni::getSaveTimeInterval() const
 {
     return m_saveTimeInterval;
-}
-
-int ConfigIni::getDeleteTimeInterval() const
-{
-    return m_deleteTimeInterval;
 }
 

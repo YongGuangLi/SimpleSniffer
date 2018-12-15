@@ -3,6 +3,7 @@
 
 #include "pcap.h"
 #include "configini.h"
+#include "logutils.h"
 
 #include <QObject>
 #include <QThread>
@@ -42,9 +43,17 @@ public slots:
     * @date      2018-10-30
     * @param
     * @return
-    * @brief     停止抓包
+    * @brief     退出pcap_loop
     */
-    void stopSniffer();
+    void breakLoop();
+
+//    /**
+//    * @date     2018-12-05
+//    * @param
+//    * @return
+//    * @brief    发送心跳
+//    */
+//    void sendHeartBeat();
 private:
     static void loop_callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
 

@@ -5,15 +5,10 @@ SimpleSniffer::SimpleSniffer(QObject *parent) :
     QThread(parent)
 {
     isRunning = true;
-    QDir dir(SingletonConfig->getPcapPath());
-    if(!dir.exists())
-        dir.mkpath(SingletonConfig->getPcapPath());
-
-    qDebug()<<QString::fromLocal8Bit("报文存放路径:%1").arg(SingletonConfig->getPcapPath());
 
     //保存时间间隔，数据保存到新文件
     timer = new QTimer();
-    connect(timer, SIGNAL(timeout()), this, SLOT(stopSniffer()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(breakLoop()));
     timer->start(SingletonConfig->getSaveTimeInterval() * 60 * 1000);
 }
 
@@ -23,7 +18,7 @@ SimpleSniffer::~SimpleSniffer()
     timer->deleteLater();
 
     isRunning = false;
-    stopSniffer();
+    breakLoop();
     quit();
     wait();
 }
@@ -42,17 +37,17 @@ pcap_t* SimpleSniffer::OpenDev(const char *pszFdevice)
     {
         // don't care whether is successful
         if(pcap_set_snaplen(pcap_handle, 65536) != 0)
-            printf("pcap_set_snaplen() is failed for len[%d]", 65536);
+            DEBUG("pcap_set_snaplen() is failed for len:"<<65536);
 
         if(pcap_set_promisc(pcap_handle, true) != 0)
-            qDebug()<<"pcap_set_promisc() is failure";
+            DEBUG("pcap_set_promisc() is failure");
 
         if(pcap_set_timeout(pcap_handle, 0) != 0)
-            qDebug()<<"pcap_set_timeout() is failure";
+            DEBUG("pcap_set_timeout() is failure");
 
-        const size_t pcap_buf_size =  32 * 1024 * 1024;
+        const size_t pcap_buf_size =  512 * 1024 * 1024;
         if(pcap_set_buffer_size(pcap_handle, pcap_buf_size) != 0)
-            qDebug()<<"pcap_set_buffer_size failed for size:"<<pcap_buf_size;
+            DEBUG("pcap_set_buffer_size failed for size:"<<pcap_buf_size);
 
         if(pcap_activate(pcap_handle) != 0)
         {
@@ -63,7 +58,7 @@ pcap_t* SimpleSniffer::OpenDev(const char *pszFdevice)
     }
 
     if(pcap_handle==NULL)
-        qDebug()<<szErr;
+        DEBUG(szErr);
 
     return pcap_handle;
 }
@@ -72,9 +67,9 @@ void SimpleSniffer::run()
 {
     handle = OpenDev(SingletonConfig->getEth().toLatin1().data());
     if(handle != NULL)
-        qDebug()<<QString::fromLocal8Bit("打开设备:%1 成功").arg(SingletonConfig->getEth());
+        DEBUG(QString::fromLocal8Bit("打开设备:%1 成功").arg(SingletonConfig->getEth()).toLocal8Bit().data());
     else
-        qDebug()<<QString::fromLocal8Bit("打开设备:%1 失败").arg(SingletonConfig->getEth());
+        DEBUG(QString::fromLocal8Bit("打开设备:%1 失败").arg(SingletonConfig->getEth()).toLocal8Bit().data());
 
     while(isRunning)
     {
@@ -82,11 +77,11 @@ void SimpleSniffer::run()
         QString pcapfile = QString("%1/%2.pcap").arg(SingletonConfig->getPcapPath()).arg(startTime);
         dumpfile = pcap_dump_open(handle, pcapfile.toStdString().c_str());
 
-        qDebug()<<QString::fromLocal8Bit("开始抓包，数据保存到:%1").arg(pcapfile);
+        DEBUG(QString::fromLocal8Bit("开始抓包，数据保存到:%1").arg(pcapfile).toLocal8Bit().data());
 
-        pcap_loop( handle, 65535, loop_callback, (u_char *)dumpfile);
+        pcap_loop( handle, -1, loop_callback, (u_char *)dumpfile);
 
-        qDebug()<<QString::fromLocal8Bit("抓包完成");
+        DEBUG(QString::fromLocal8Bit("抓包完成").toLocal8Bit().data());
 
         pcap_dump_close(dumpfile);
     }
@@ -101,7 +96,7 @@ void SimpleSniffer::loop_callback(u_char *args, const struct pcap_pkthdr *header
 }
 
 
-void SimpleSniffer::stopSniffer()
+void SimpleSniffer::breakLoop()
 {
     pcap_breakloop(handle);
 }

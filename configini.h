@@ -1,6 +1,7 @@
 #ifndef CONFIGINI_H
 #define CONFIGINI_H
 
+#include "logutils.h"
 #include <QCoreApplication>
 #include <QObject>
 #include <QFile>
@@ -15,6 +16,8 @@ class ConfigIni : public QObject
 public:
     static ConfigIni *GetInstance();  
 	bool initConfigFile(QString);
+
+    QString getChannel() const;
 
     QString getEth() const;
 
@@ -33,11 +36,12 @@ public slots:
 private:
     int m_saveTimeInterval;     //保存间隔  单位:分钟
 
-    int m_deleteTimeInterval;
-
     QString m_eth;
 
-    QString m_pcapPath;
+    QString m_pcapSrcPath;
+    QString m_pcapDstPath;
+
+    QString m_channel;
 };
 
 #endif // CONFIGINI_H
