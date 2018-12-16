@@ -67,9 +67,9 @@ void SimpleSniffer::run()
 {
     handle = OpenDev(SingletonConfig->getEth().toLatin1().data());
     if(handle != NULL)
-        DEBUG(QString::fromLocal8Bit("打开设备:%1 成功").arg(SingletonConfig->getEth()).toLocal8Bit().data());
+        DEBUG(QString::fromLocal8Bit("Open Device:%1 Success").arg(SingletonConfig->getEth()).toLocal8Bit().data());
     else
-        DEBUG(QString::fromLocal8Bit("打开设备:%1 失败").arg(SingletonConfig->getEth()).toLocal8Bit().data());
+        DEBUG(QString::fromLocal8Bit("Open Device:%1 Failure").arg(SingletonConfig->getEth()).toLocal8Bit().data());
 
     while(isRunning)
     {
@@ -77,11 +77,11 @@ void SimpleSniffer::run()
         QString pcapfile = QString("%1/%2.pcap").arg(SingletonConfig->getPcapPath()).arg(startTime);
         dumpfile = pcap_dump_open(handle, pcapfile.toStdString().c_str());
 
-        DEBUG(QString::fromLocal8Bit("开始抓包，数据保存到:%1").arg(pcapfile).toLocal8Bit().data());
+        DEBUG(QString::fromLocal8Bit("Start，Packet Save:%1").arg(pcapfile).toLocal8Bit().data());
 
         pcap_loop( handle, -1, loop_callback, (u_char *)dumpfile);
 
-        DEBUG(QString::fromLocal8Bit("抓包完成").toLocal8Bit().data());
+        DEBUG(QString::fromLocal8Bit("Sniffer Complete").toLocal8Bit().data());
 
         pcap_dump_close(dumpfile);
     }
