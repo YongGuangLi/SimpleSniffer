@@ -4,6 +4,7 @@
 
 #include <QCoreApplication>
 
+#define VERSION "20190115"
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +20,8 @@ int main(int argc, char *argv[])
         dir.mkpath(qApp->applicationDirPath() + "/logs");
 
     LogUtils::instance()->initLogger(qApp->applicationDirPath().toStdString() + "/log4cplus.properties", "Sniffer");
+
+    DEBUG(QString::fromLocal8Bit("Version:%1").arg(VERSION).toLocal8Bit().data());
 
     DEBUG(QString::fromLocal8Bit("Pcap Save Path:%1").arg(SingletonConfig->getPcapPath()).toLocal8Bit().data());
 

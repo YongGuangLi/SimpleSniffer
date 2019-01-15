@@ -24,6 +24,11 @@ bool ConfigIni::initConfigFile(QString fileName)
 		QSettings* settings_ = new QSettings(fileName,QSettings::IniFormat);
 		settings_->setIniCodec("UTF-8");
 
+        settings_->beginGroup("redis");
+        m_redisIp =  settings_->value("redis_ip").toString();
+        m_redisPort =  settings_->value("redis_port").toInt();
+        settings_->endGroup();
+
         settings_->beginGroup("PCAPPATH");
         m_pcapSrcPath = settings_->value("pcapsrcpath").toString();
         m_pcapDstPath = settings_->value("pcapdstpath").toString();
@@ -44,10 +49,23 @@ bool ConfigIni::initConfigFile(QString fileName)
     return result;
 }
 
-QString ConfigIni::getChannel() const
+QString ConfigIni::getChannelName() const
 {
     return m_channel;
 }
+
+
+QString ConfigIni::getIpRedis() const
+{
+    return m_redisIp;
+}
+
+
+int ConfigIni::getPortRedis() const
+{
+    return m_redisPort;
+}
+
 
 QString ConfigIni::getEth() const
 {

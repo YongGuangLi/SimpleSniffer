@@ -17,7 +17,12 @@ public:
     static ConfigIni *GetInstance();  
 	bool initConfigFile(QString);
 
-    QString getChannel() const;
+    QString getChannelName() const;
+
+    //redis数据
+    QString getIpRedis() const;
+    int getPortRedis() const;
+
 
     QString getEth() const;
 
@@ -35,6 +40,9 @@ public slots:
     
 private:
     int m_saveTimeInterval;     //保存间隔  单位:分钟
+
+    QString m_redisIp;
+    int m_redisPort;
 
     QString m_eth;
 

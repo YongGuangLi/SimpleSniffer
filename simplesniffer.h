@@ -4,8 +4,11 @@
 #include "pcap.h"
 #include "configini.h"
 #include "logutils.h"
+#include "RedisHelper.h"
+#include "NetworkCollect.pb.h"
 
 #include <QObject>
+#include <QtCore>
 #include <QThread>
 #include <QDebug>
 #include <QList>
@@ -47,13 +50,15 @@ public slots:
     */
     void breakLoop();
 
-//    /**
-//    * @date     2018-12-05
-//    * @param
-//    * @return
-//    * @brief    发送心跳
-//    */
-//    void sendHeartBeat();
+    void redisSubscribe();
+
+    /**
+    * @date     2018-12-05
+    * @param
+    * @return
+    * @brief    发送心跳
+    */
+    void sendHeartBeat();
 private:
     static void loop_callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
 
@@ -65,6 +70,8 @@ private:
     bool isRunning;
     QString startTime;
     QTimer *timer;
+
+    RedisHelper *m_redisHelper;
 };
 
 #endif // SIMPLESNIFFER_H

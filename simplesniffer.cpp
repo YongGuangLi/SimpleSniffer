@@ -6,6 +6,11 @@ SimpleSniffer::SimpleSniffer(QObject *parent) :
 {
     isRunning = true;
 
+    QtConcurrent::run(this, &SimpleSniffer::redisSubscribe);
+    QTimer *timerHeart = new QTimer();
+    connect(timerHeart, SIGNAL(timeout()), this, SLOT(sendHeartBeat()));
+    timerHeart->start(10 * 1000);
+
     //保存时间间隔，数据保存到新文件
     timer = new QTimer();
     connect(timer, SIGNAL(timeout()), this, SLOT(breakLoop()));
@@ -101,4 +106,53 @@ void SimpleSniffer::breakLoop()
     pcap_breakloop(handle);
 }
 
+
+void SimpleSniffer::redisSubscribe()
+{
+    QString redisAddr = QString("%1:%2").arg(SingletonConfig->getIpRedis()).arg(SingletonConfig->getPortRedis());
+    m_redisHelper = new RedisHelper(redisAddr.toLocal8Bit().data());
+
+    while(1)
+    {
+        if(!m_redisHelper->check_connect())
+        {
+            if(m_redisHelper->open())
+            {
+                DEBUG(QString("Redis Connect Success:%1").arg(redisAddr).toLocal8Bit().data());
+
+                if(m_redisHelper->subscribe(SingletonConfig->getChannelName().toLocal8Bit().data(), NULL) >= 1)
+                    DEBUG(QString("Redis Subscribe Success:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
+                else
+                    WARN(QString("Redis Subscribe Failure:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
+            }else
+            {
+                WARN(QString("Redis Connect Failure:%1").arg(redisAddr).toLocal8Bit().data());
+                sleep(1);
+                continue;
+            }
+        }
+
+        string message;
+        if(m_redisHelper->getMessage(message))
+        {
+            DEBUG(message);
+        }
+    }
+}
+
+void SimpleSniffer::sendHeartBeat()
+{
+    MainMessage mainMessage;
+    mainMessage.set_msgtype(MT_HeartBeatMessage);
+    HeartBeatMessage *heartBeatMessage = mainMessage.mutable_heartbeatmessage();
+    heartBeatMessage->set_time(QDateTime::currentDateTime().toTime_t());
+    heartBeatMessage->set_channelname(SingletonConfig->getChannelName().toLocal8Bit().data());
+
+    string message;
+    mainMessage.SerializeToString(&message);
+    if(m_redisHelper->check_connect())
+    {
+        m_redisHelper->publish(REDIS_PROCESSMANAGE, message);
+    }
+}
 
