@@ -23,6 +23,7 @@ public:
     QString getIpRedis() const;
     int getPortRedis() const;
 
+    QString getPasswdMysql() const;
 
     QString getEth() const;
 
@@ -43,11 +44,13 @@ private:
 
     QString m_redisIp;
     int m_redisPort;
+    QString m_mysqlPassWord;
 
     QString m_eth;
 
     QString m_pcapSrcPath;
     QString m_pcapDstPath;
+
 
     QString m_channel;
 };

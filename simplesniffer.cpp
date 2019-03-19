@@ -42,17 +42,17 @@ pcap_t* SimpleSniffer::OpenDev(const char *pszFdevice)
     {
         // don't care whether is successful
         if(pcap_set_snaplen(pcap_handle, 65536) != 0)
-            DEBUG("pcap_set_snaplen() is failed for len:"<<65536);
+            WARN("pcap_set_snaplen() is failed for len:"<<65536);
 
         if(pcap_set_promisc(pcap_handle, true) != 0)
-            DEBUG("pcap_set_promisc() is failure");
+            WARN("pcap_set_promisc() is failure");
 
         if(pcap_set_timeout(pcap_handle, 0) != 0)
-            DEBUG("pcap_set_timeout() is failure");
+            WARN("pcap_set_timeout() is failure");
 
         const size_t pcap_buf_size =  512 * 1024 * 1024;
         if(pcap_set_buffer_size(pcap_handle, pcap_buf_size) != 0)
-            DEBUG("pcap_set_buffer_size failed for size:"<<pcap_buf_size);
+            WARN("pcap_set_buffer_size failed for size:"<<pcap_buf_size);
 
         if(pcap_activate(pcap_handle) != 0)
         {
@@ -63,7 +63,7 @@ pcap_t* SimpleSniffer::OpenDev(const char *pszFdevice)
     }
 
     if(pcap_handle==NULL)
-        DEBUG(szErr);
+        WARN(szErr);
 
     return pcap_handle;
 }
@@ -72,9 +72,9 @@ void SimpleSniffer::run()
 {
     handle = OpenDev(SingletonConfig->getEth().toLatin1().data());
     if(handle != NULL)
-        DEBUG(QString::fromLocal8Bit("Open Device:%1 Success").arg(SingletonConfig->getEth()).toLocal8Bit().data());
+        INFO(QString::fromLocal8Bit("Open Device:%1 Success").arg(SingletonConfig->getEth()).toLocal8Bit().data());
     else
-        DEBUG(QString::fromLocal8Bit("Open Device:%1 Failure").arg(SingletonConfig->getEth()).toLocal8Bit().data());
+        WARN(QString::fromLocal8Bit("Open Device:%1 Failure").arg(SingletonConfig->getEth()).toLocal8Bit().data());
 
     while(isRunning)
     {
@@ -82,11 +82,11 @@ void SimpleSniffer::run()
         QString pcapfile = QString("%1/%2.pcap").arg(SingletonConfig->getPcapPath()).arg(startTime);
         dumpfile = pcap_dump_open(handle, pcapfile.toStdString().c_str());
 
-        DEBUG(QString::fromLocal8Bit("Start，Packet Save:%1").arg(pcapfile).toLocal8Bit().data());
+        INFO(QString::fromLocal8Bit("Start，Packet Save:%1").arg(pcapfile).toLocal8Bit().data());
 
         pcap_loop( handle, -1, loop_callback, (u_char *)dumpfile);
 
-        DEBUG(QString::fromLocal8Bit("Sniffer Complete").toLocal8Bit().data());
+        INFO(QString::fromLocal8Bit("Sniffer Complete").toLocal8Bit().data());
 
         pcap_dump_close(dumpfile);
     }
@@ -110,7 +110,7 @@ void SimpleSniffer::breakLoop()
 void SimpleSniffer::redisSubscribe()
 {
     QString redisAddr = QString("%1:%2").arg(SingletonConfig->getIpRedis()).arg(SingletonConfig->getPortRedis());
-    m_redisHelper = new RedisHelper(redisAddr.toLocal8Bit().data());
+    m_redisHelper = new RedisHelper(redisAddr.toLocal8Bit().data(), SingletonConfig->getPasswdMysql().toLocal8Bit().data());
 
     while(1)
     {
@@ -118,10 +118,10 @@ void SimpleSniffer::redisSubscribe()
         {
             if(m_redisHelper->open())
             {
-                DEBUG(QString("Redis Connect Success:%1").arg(redisAddr).toLocal8Bit().data());
+                INFO(QString("Redis Connect Success:%1").arg(redisAddr).toLocal8Bit().data());
 
                 if(m_redisHelper->subscribe(SingletonConfig->getChannelName().toLocal8Bit().data(), NULL) >= 1)
-                    DEBUG(QString("Redis Subscribe Success:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
+                    INFO(QString("Redis Subscribe Success:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
                 else
                     WARN(QString("Redis Subscribe Failure:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
             }else
@@ -135,7 +135,7 @@ void SimpleSniffer::redisSubscribe()
         string message;
         if(m_redisHelper->getMessage(message))
         {
-            DEBUG(message);
+            INFO(message);
         }
     }
 }
@@ -150,9 +150,9 @@ void SimpleSniffer::sendHeartBeat()
 
     string message;
     mainMessage.SerializeToString(&message);
-    if(m_redisHelper->check_connect())
-    {
-        m_redisHelper->publish(REDIS_PROCESSMANAGE, message);
-    }
+    if(m_redisHelper->publish(REDIS_PROCESSMANAGE, message) >= 0)
+        DEBUG("Heart Send Success!");
+    else
+        WARN("Heart Send Failure!");
 }
 

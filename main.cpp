@@ -16,14 +16,11 @@ int main(int argc, char *argv[])
     if(!dir.exists(SingletonConfig->getPcapPath()))
         dir.mkpath(SingletonConfig->getPcapPath());
 
-    if(!dir.exists(qApp->applicationDirPath() + "/logs"))
-        dir.mkpath(qApp->applicationDirPath() + "/logs");
-
     LogUtils::instance()->initLogger(qApp->applicationDirPath().toStdString() + "/log4cplus.properties", "Sniffer");
 
-    DEBUG(QString::fromLocal8Bit("Version:%1").arg(VERSION).toLocal8Bit().data());
+    INFO(QString::fromLocal8Bit("Version:%1").arg(VERSION).toLocal8Bit().data());
 
-    DEBUG(QString::fromLocal8Bit("Pcap Save Path:%1").arg(SingletonConfig->getPcapPath()).toLocal8Bit().data());
+    INFO(QString::fromLocal8Bit("Pcap Save Path:%1").arg(SingletonConfig->getPcapPath()).toLocal8Bit().data());
 
     SimpleSniffer simpleSniffer;
     simpleSniffer.start();

@@ -34,6 +34,10 @@ bool ConfigIni::initConfigFile(QString fileName)
         m_pcapDstPath = settings_->value("pcapdstpath").toString();
         settings_->endGroup();
 
+        settings_->beginGroup("mysql");
+        m_mysqlPassWord = settings_->value("mysql_pwd").toString();
+        settings_->endGroup();
+
         settings_->beginGroup("ETH");
         m_eth = settings_->value("eth").toString();
         settings_->endGroup();
@@ -64,6 +68,11 @@ QString ConfigIni::getIpRedis() const
 int ConfigIni::getPortRedis() const
 {
     return m_redisPort;
+}
+
+QString ConfigIni::getPasswdMysql() const
+{
+    return m_mysqlPassWord;
 }
 
 
