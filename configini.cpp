@@ -27,6 +27,7 @@ bool ConfigIni::initConfigFile(QString fileName)
         settings_->beginGroup("redis");
         m_redisIp =  settings_->value("redis_ip").toString();
         m_redisPort =  settings_->value("redis_port").toInt();
+        m_redisPasswd =  settings_->value("redis_passwd").toString();
         settings_->endGroup();
 
         settings_->beginGroup("PCAPPATH");
@@ -34,9 +35,6 @@ bool ConfigIni::initConfigFile(QString fileName)
         m_pcapDstPath = settings_->value("pcapdstpath").toString();
         settings_->endGroup();
 
-        settings_->beginGroup("mysql");
-        m_mysqlPassWord = settings_->value("mysql_pwd").toString();
-        settings_->endGroup();
 
         settings_->beginGroup("ETH");
         m_eth = settings_->value("eth").toString();
@@ -70,9 +68,9 @@ int ConfigIni::getPortRedis() const
     return m_redisPort;
 }
 
-QString ConfigIni::getPasswdMysql() const
+QString ConfigIni::getPasswdRedis() const
 {
-    return m_mysqlPassWord;
+    return m_redisPasswd;
 }
 
 

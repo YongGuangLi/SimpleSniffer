@@ -7,6 +7,8 @@ SimpleSniffer::SimpleSniffer(QObject *parent) :
     isRunning = true;
 
     QtConcurrent::run(this, &SimpleSniffer::redisSubscribe);
+
+
     QTimer *timerHeart = new QTimer();
     connect(timerHeart, SIGNAL(timeout()), this, SLOT(sendHeartBeat()));
     timerHeart->start(10 * 1000);
@@ -26,6 +28,40 @@ SimpleSniffer::~SimpleSniffer()
     breakLoop();
     quit();
     wait();
+}
+
+
+void SimpleSniffer::redisSubscribe()
+{
+    QString redisAddr = QString("%1:%2").arg(SingletonConfig->getIpRedis()).arg(SingletonConfig->getPortRedis());
+    m_redisHelper = new RedisHelper(redisAddr.toLocal8Bit().data(), SingletonConfig->getPasswdRedis().toLocal8Bit().data());
+    INFO(QString("RedisAddr %1:%2").arg(SingletonConfig->getIpRedis()).arg(SingletonConfig->getPortRedis()).toStdString());
+    while(1)
+    {
+        if(!m_redisHelper->check_connect())
+        {
+            if(m_redisHelper->open())
+            {
+                INFO(QString("Redis Connect Success:%1").arg(redisAddr).toLocal8Bit().data());
+
+                if(m_redisHelper->subscribe(SingletonConfig->getChannelName().toLocal8Bit().data(), NULL) >= 1)
+                    INFO(QString("Redis Subscribe Success:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
+                else
+                    WARN(QString("Redis Subscribe Failure:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
+            }else
+            {
+                WARN(QString("Redis Connect Failure:%1").arg(redisAddr).toLocal8Bit().data());
+                sleep(1);
+                continue;
+            }
+        }
+
+        string message;
+        if(m_redisHelper->getMessage(message))
+        {
+            INFO(message);
+        }
+    }
 }
 
 pcap_t* SimpleSniffer::OpenDev(const char *pszFdevice)
@@ -106,39 +142,6 @@ void SimpleSniffer::breakLoop()
     pcap_breakloop(handle);
 }
 
-
-void SimpleSniffer::redisSubscribe()
-{
-    QString redisAddr = QString("%1:%2").arg(SingletonConfig->getIpRedis()).arg(SingletonConfig->getPortRedis());
-    m_redisHelper = new RedisHelper(redisAddr.toLocal8Bit().data(), SingletonConfig->getPasswdMysql().toLocal8Bit().data());
-
-    while(1)
-    {
-        if(!m_redisHelper->check_connect())
-        {
-            if(m_redisHelper->open())
-            {
-                INFO(QString("Redis Connect Success:%1").arg(redisAddr).toLocal8Bit().data());
-
-                if(m_redisHelper->subscribe(SingletonConfig->getChannelName().toLocal8Bit().data(), NULL) >= 1)
-                    INFO(QString("Redis Subscribe Success:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
-                else
-                    WARN(QString("Redis Subscribe Failure:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
-            }else
-            {
-                WARN(QString("Redis Connect Failure:%1").arg(redisAddr).toLocal8Bit().data());
-                sleep(1);
-                continue;
-            }
-        }
-
-        string message;
-        if(m_redisHelper->getMessage(message))
-        {
-            INFO(message);
-        }
-    }
-}
 
 void SimpleSniffer::sendHeartBeat()
 {

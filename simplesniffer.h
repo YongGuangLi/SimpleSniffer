@@ -23,6 +23,10 @@ public:
     explicit SimpleSniffer(QObject *parent = 0);
     ~SimpleSniffer();
 
+
+    void redisSubscribe();
+
+
     /**
     * @date      %{CurrentDate:yyyy-MM-dd}
     * @param
@@ -50,7 +54,6 @@ public slots:
     */
     void breakLoop();
 
-    void redisSubscribe();
 
     /**
     * @date     2018-12-05

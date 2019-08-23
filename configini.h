@@ -22,6 +22,7 @@ public:
     //redis数据
     QString getIpRedis() const;
     int getPortRedis() const;
+    QString getPasswdRedis() const;
 
     QString getPasswdMysql() const;
 
@@ -44,7 +45,7 @@ private:
 
     QString m_redisIp;
     int m_redisPort;
-    QString m_mysqlPassWord;
+    QString m_redisPasswd;
 
     QString m_eth;
 
