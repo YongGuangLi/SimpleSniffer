@@ -24,8 +24,10 @@ public:
     ~SimpleSniffer();
 
 
-    void redisSubscribe();
+    void snifferEth(QString eth);
 
+
+    void redisSubscribe();
 
     /**
     * @date      %{CurrentDate:yyyy-MM-dd}
@@ -66,13 +68,9 @@ private:
     static void loop_callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
 
 private:
-    pcap_t *handle;              /* 会话句柄 */
-    pcap_dumper_t *dumpfile;
-
-private:
     bool isRunning;
-    QString startTime;
     QTimer *timer;
+    QList<pcap_t *> listHandle;
 
     RedisHelper *m_redisHelper;
 };

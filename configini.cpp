@@ -37,7 +37,7 @@ bool ConfigIni::initConfigFile(QString fileName)
 
 
         settings_->beginGroup("ETH");
-        m_eth = settings_->value("eth").toString();
+        m_eths = settings_->value("eths").toString().split(" ");
         settings_->endGroup();
 
         settings_->beginGroup("TIMEINTERVAL");
@@ -74,12 +74,12 @@ QString ConfigIni::getPasswdRedis() const
 }
 
 
-QString ConfigIni::getEth() const
+QStringList ConfigIni::getEths() const
 {
-    return m_eth;
+    return m_eths;
 }
 
-QString ConfigIni::getPcapPath() const
+QString ConfigIni::getPcapSrcPath() const
 {
     return m_pcapSrcPath;
 }

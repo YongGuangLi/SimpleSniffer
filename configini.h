@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QFile>
 #include <QDebug>
+#include <QStringList>
 #include <QSettings>
 
 #define SingletonConfig ConfigIni::GetInstance()
@@ -26,9 +27,9 @@ public:
 
     QString getPasswdMysql() const;
 
-    QString getEth() const;
+    QStringList getEths() const;
 
-    QString getPcapPath() const;
+    QString getPcapSrcPath() const;
 
     int getSaveTimeInterval() const;
 
@@ -47,7 +48,7 @@ private:
     int m_redisPort;
     QString m_redisPasswd;
 
-    QString m_eth;
+    QStringList m_eths;
 
     QString m_pcapSrcPath;
     QString m_pcapDstPath;
