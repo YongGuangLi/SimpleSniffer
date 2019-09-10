@@ -16,7 +16,7 @@
 #include <QDateTime>
 #include <QTimer>
 
-class SimpleSniffer : public QThread
+class SimpleSniffer : public QObject
 {
     Q_OBJECT
 public:
@@ -26,9 +26,6 @@ public:
 
     void snifferEth(QString eth);
 
-
-    void redisSubscribe();
-
     /**
     * @date      %{CurrentDate:yyyy-MM-dd}
     * @param
@@ -36,14 +33,6 @@ public:
     * @brief     摘要
     */
     pcap_t* OpenDev(const char *pszFdevice);
-
-    /**
-    * @date      2018-10-25
-    * @param
-    * @return
-    * @brief     抓包
-    */
-    void run();
 
 signals:
     
@@ -71,8 +60,6 @@ private:
     bool isRunning;
     QTimer *timer;
     QList<pcap_t *> listHandle;
-
-    RedisHelper *m_redisHelper;
 };
 
 #endif // SIMPLESNIFFER_H

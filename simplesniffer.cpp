@@ -2,7 +2,7 @@
 
 
 SimpleSniffer::SimpleSniffer(QObject *parent) :
-    QThread(parent)
+    QObject(parent)
 {
     isRunning = true;
 
@@ -10,7 +10,6 @@ SimpleSniffer::SimpleSniffer(QObject *parent) :
     connect(timerHeart, SIGNAL(timeout()), this, SLOT(sendHeartBeat()));
     timerHeart->start(10 * 1000);
 
-    QThreadPool::globalInstance()->setMaxThreadCount(32);
 
     for(int i = 0; i < SingletonConfig->getEths().size(); ++i)
     {
@@ -31,8 +30,6 @@ SimpleSniffer::~SimpleSniffer()
 
     isRunning = false;
     breakLoop();
-    quit();
-    wait();
 }
 
 void SimpleSniffer::snifferEth(QString eth)
@@ -99,40 +96,6 @@ pcap_t* SimpleSniffer::OpenDev(const char *pszFdevice)
     return pcap_handle;
 }
 
-void SimpleSniffer::run()
-{
-    QString redisAddr = QString("%1:%2").arg(SingletonConfig->getIpRedis()).arg(SingletonConfig->getPortRedis());
-    m_redisHelper = new RedisHelper(redisAddr.toLocal8Bit().data(), SingletonConfig->getPasswdRedis().toLocal8Bit().data());
-    INFO(QString("RedisAddr %1:%2").arg(SingletonConfig->getIpRedis()).arg(SingletonConfig->getPortRedis()).toStdString());
-    while(1)
-    {
-        if(!m_redisHelper->check_connect())
-        {
-            if(m_redisHelper->open())
-            {
-                INFO(QString("Redis Connect Success:%1").arg(redisAddr).toLocal8Bit().data());
-
-                if(m_redisHelper->subscribe(SingletonConfig->getChannelName().toLocal8Bit().data(), NULL) >= 1)
-                    INFO(QString("Redis Subscribe Success:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
-                else
-                    WARN(QString("Redis Subscribe Failure:%1").arg(SingletonConfig->getChannelName()).toLocal8Bit().data());
-            }else
-            {
-                WARN(QString("Redis Connect Failure:%1").arg(redisAddr).toLocal8Bit().data());
-                sleep(1);
-                continue;
-            }
-        }
-
-        string message;
-        if(m_redisHelper->getMessage(message))
-        {
-            INFO(message);
-        }
-    }
-}
-
-
 void SimpleSniffer::loop_callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
     pcap_dump(args,  header, packet);
@@ -160,7 +123,7 @@ void SimpleSniffer::sendHeartBeat()
 
     string message;
     mainMessage.SerializeToString(&message);
-    if(m_redisHelper->publish(REDIS_PROCESSMANAGE, message) >= 0)
+    if(SingleRedisHelp->publish(REDIS_PROCESSMANAGE, message) >= 0)
         DEBUG("Heart Send Success!");
     else
         WARN("Heart Send Failure!");

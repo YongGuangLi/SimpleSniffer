@@ -78,4 +78,3 @@ DEPENDPATH += $$PWD/../acl/lib_acl/include
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../acl/lib_acl/lib/release/acl.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../acl/lib_acl/lib/debug/acl.lib
 else:unix: PRE_TARGETDEPS += $$PWD/../acl/lib_acl/lib/libacl.a
-
