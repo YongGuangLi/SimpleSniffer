@@ -10,7 +10,7 @@ void redisSubscribe()
 {
     QString redisAddr = QString("%1:%2").arg(SingletonConfig->getIpRedis()).arg(SingletonConfig->getPortRedis());
     SingleRedisHelp->setConnParas(redisAddr.toLocal8Bit().data(), SingletonConfig->getPasswdRedis().toLocal8Bit().data());
-    INFO(QString("RedisAddr %1:%2").arg(SingletonConfig->getIpRedis()).arg(SingletonConfig->getPortRedis()).toStdString());
+
     while(1)
     {
         if(!SingleRedisHelp->check_connect())
@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-
     QThreadPool::globalInstance()->setMaxThreadCount(32);
 
     LogUtils::instance()->initLogger(qApp->applicationDirPath().toStdString() + "/log4cplus.properties", "Sniffer");
@@ -58,10 +57,15 @@ int main(int argc, char *argv[])
     for(int i = 0; i < SingletonConfig->getEths().size(); ++i)
     {
         QString eth = SingletonConfig->getEths().at(i);
-        INFO(QString::fromLocal8Bit("Pcap Save Path:%1/%2").arg(SingletonConfig->getPcapSrcPath()).arg(eth).toLocal8Bit().data());
+
         QDir dir;
         if(!dir.exists(QString("%1/%2").arg(SingletonConfig->getPcapSrcPath()).arg(eth)))
             dir.mkpath(QString("%1/%2").arg(SingletonConfig->getPcapSrcPath()).arg(eth));
+        INFO(QString::fromLocal8Bit("Pcap Src Path:%1/%2").arg(SingletonConfig->getPcapSrcPath()).arg(eth).toLocal8Bit().data());
+
+        if(!dir.exists(QString("%1/%2").arg(SingletonConfig->getPcapDstPath()).arg(eth)))
+            dir.mkpath(QString("%1/%2").arg(SingletonConfig->getPcapDstPath()).arg(eth));
+        INFO(QString::fromLocal8Bit("Pcap Dst Path:%1/%2").arg(SingletonConfig->getPcapDstPath()).arg(eth).toLocal8Bit().data());
     }
 
 

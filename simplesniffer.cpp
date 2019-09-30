@@ -10,7 +10,6 @@ SimpleSniffer::SimpleSniffer(QObject *parent) :
     connect(timerHeart, SIGNAL(timeout()), this, SLOT(sendHeartBeat()));
     timerHeart->start(10 * 1000);
 
-
     for(int i = 0; i < SingletonConfig->getEths().size(); ++i)
     {
         QString eth = SingletonConfig->getEths().at(i);
@@ -45,7 +44,7 @@ void SimpleSniffer::snifferEth(QString eth)
 
     while(isRunning)
     {
-        QString startTime = QDateTime::currentDateTime().toString("yyyyMMddhhmmss");
+        QString startTime = QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz");
         QString pcapfile = QString("%1/%2/%2%3.pcap").arg(SingletonConfig->getPcapSrcPath()).arg(eth).arg(startTime);
         pcap_dumper_t *dumpfile = pcap_dump_open(handle, pcapfile.toStdString().c_str());
 
