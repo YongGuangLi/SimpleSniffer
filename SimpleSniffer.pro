@@ -19,7 +19,7 @@ SOURCES += main.cpp \
     configini.cpp \
     logutils.cpp \
     RedisHelper.cpp \
-    NetworkCollect.pb.cc
+    NetworkAwareness.pb.cc
 
 HEADERS += \
     simplesniffer.h \
@@ -29,7 +29,7 @@ HEADERS += \
     RedisHelper.h \
     NetworkCollect.pb.h \
     RedisHelper.h \
-    NetworkCollect.pb.h
+    NetworkAwareness.pb.h
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libpcap/lib/release/ -lpcap

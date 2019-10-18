@@ -1,6 +1,8 @@
 #include "simplesniffer.h"
 
 
+
+
 SimpleSniffer::SimpleSniffer(QObject *parent) :
     QObject(parent)
 {

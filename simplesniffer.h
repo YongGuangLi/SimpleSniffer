@@ -5,7 +5,7 @@
 #include "configini.h"
 #include "logutils.h"
 #include "RedisHelper.h"
-#include "NetworkCollect.pb.h"
+#include "NetworkAwareness.pb.h"
 
 #include <QObject>
 #include <QtCore>
@@ -15,6 +15,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QTimer>
+#include <QMutex>
 
 class SimpleSniffer : public QObject
 {
@@ -34,9 +35,7 @@ public:
     */
     pcap_t* OpenDev(const char *pszFdevice);
 
-signals:
-    
-public slots:
+
     /**
     * @date      2018-10-30
     * @param
@@ -44,7 +43,9 @@ public slots:
     * @brief     退出pcap_loop
     */
     void breakLoop();
-
+signals:
+    
+public slots:
 
     /**
     * @date     2018-12-05
@@ -55,7 +56,6 @@ public slots:
     void sendHeartBeat();
 private:
     static void loop_callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
-
 private:
     bool isRunning;
     QTimer *timer;
