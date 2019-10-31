@@ -34,15 +34,6 @@ public:
     * @brief     摘要
     */
     pcap_t* OpenDev(const char *pszFdevice);
-
-
-    /**
-    * @date      2018-10-30
-    * @param
-    * @return
-    * @brief     退出pcap_loop
-    */
-    void breakLoop();
 signals:
     
 public slots:
@@ -54,6 +45,15 @@ public slots:
     * @brief    发送心跳
     */
     void sendHeartBeat();
+
+
+    /**
+    * @date      2018-10-30
+    * @param
+    * @return
+    * @brief     退出pcap_loop
+    */
+    void breakLoop();
 private:
     static void loop_callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
 private:

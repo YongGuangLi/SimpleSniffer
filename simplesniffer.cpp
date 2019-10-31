@@ -38,19 +38,19 @@ void SimpleSniffer::snifferEth(QString eth)
     pcap_t* handle = OpenDev(eth.toLatin1().data());
     if(handle != NULL)
     {
-        INFO(QString::fromLocal8Bit("Open Device:%1 Success").arg(eth).toLocal8Bit().data());
+        INFO(QString::fromLocal8Bit("Open Device:%1 Success").arg(eth).toStdString());
         listHandle.push_back(handle);
     }
     else
-        WARN(QString::fromLocal8Bit("Open Device:%1 Failure").arg(eth).toLocal8Bit().data());
+        WARN(QString::fromLocal8Bit("Open Device:%1 Failure").arg(eth).toStdString());
 
     while(isRunning)
     {
         QString startTime = QDateTime::currentDateTime().toString("yyyyMMddhhmmsszzz");
-        QString pcapfile = QString("%1/%2/%2%3.pcap").arg(SingletonConfig->getPcapSrcPath()).arg(eth).arg(startTime);
+        QString pcapfile = QString("%1/%2/%3.pcap").arg(SingletonConfig->getPcapSrcPrePath()).arg(eth).arg(startTime);
         pcap_dumper_t *dumpfile = pcap_dump_open(handle, pcapfile.toStdString().c_str());
 
-        INFO(QString::fromLocal8Bit("Start Sniffer，Packet Save:%1").arg(pcapfile).toLocal8Bit().data());
+        INFO(QString::fromLocal8Bit("Start Sniffer,Packet Save:%1").arg(pcapfile).toStdString());
 
         pcap_loop( handle, -1, loop_callback, (u_char *)dumpfile);
 
@@ -107,10 +107,7 @@ void SimpleSniffer::loop_callback(u_char *args, const struct pcap_pkthdr *header
 void SimpleSniffer::breakLoop()
 {
     for(int i = 0; i < listHandle.size(); ++i)
-    {
         pcap_breakloop(listHandle.at(i));
-        INFO(QString::fromLocal8Bit("Complete Sniffer").toLocal8Bit().data());
-    }
 }
 
 
@@ -120,7 +117,7 @@ void SimpleSniffer::sendHeartBeat()
     mainMessage.set_msgtype(MT_HeartBeatMessage);
     HeartBeatMessage *heartBeatMessage = mainMessage.mutable_heartbeatmessage();
     heartBeatMessage->set_time(QDateTime::currentDateTime().toTime_t());
-    heartBeatMessage->set_channelname(SingletonConfig->getChannelName().toLocal8Bit().data());
+    heartBeatMessage->set_channelname(SingletonConfig->getChannelName().toStdString());
 
     string message;
     mainMessage.SerializeToString(&message);
